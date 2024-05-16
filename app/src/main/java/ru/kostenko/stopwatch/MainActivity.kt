@@ -8,10 +8,11 @@ import android.widget.Button
 import android.widget.Chronometer
 
 class MainActivity : AppCompatActivity() {
-    lateinit var stopwatch: Chronometer
-    var runnig = false
-    var offset: Long = 0
+    lateinit var stopwatch: Chronometer //Хронометр
+    var runnig = false //Хронометр выполняется?
+    var offset: Long = 0 //Базовое смещение
 
+    //Добавление строк для ключей используемых с Bundle
     val OFFSET_KEY = "offset"
     val RUNNING_KEY = "running"
     val BASE_KEY = "base"
@@ -21,23 +22,24 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
+        //получение ссылки на секундомер
         stopwatch = findViewById<Chronometer>(R.id.stopwatch)
 
-        if(savedInstanceState != null){
+        //Восстановление предыдущего состояния
+        if (savedInstanceState != null) {
             offset = savedInstanceState.getLong(OFFSET_KEY)
             runnig = savedInstanceState.getBoolean(RUNNING_KEY)
-            if (runnig){
+            if (runnig) {
                 stopwatch.base = savedInstanceState.getLong(BASE_KEY)
                 stopwatch.start()
-            }
-            else{
-             setBaseTime()
+            } else {
+                setBaseTime()
             }
         }
 
         val startButton = findViewById<Button>(R.id.start_button)
-        startButton.setOnClickListener{
-            if(!runnig) {
+        startButton.setOnClickListener {
+            if (!runnig) {
                 setBaseTime()
                 stopwatch.start()
                 runnig = true
@@ -45,8 +47,8 @@ class MainActivity : AppCompatActivity() {
         }
 
         val pauseButton = findViewById<Button>(R.id.pause_button)
-        pauseButton.setOnClickListener{
-            if(runnig){
+        pauseButton.setOnClickListener {
+            if (runnig) {
                 saveOffset()
                 stopwatch.stop()
                 runnig = false
@@ -54,7 +56,7 @@ class MainActivity : AppCompatActivity() {
         }
 
         val reset = findViewById<Button>(R.id.reset_button)
-        reset.setOnClickListener{
+        reset.setOnClickListener {
             offset = 0
             setBaseTime()
         }
@@ -69,11 +71,44 @@ class MainActivity : AppCompatActivity() {
         super.onSaveInstanceState(savedInstanceState)
     }
 
-    fun setBaseTime(){
+//    override fun onStop() {
+//        super.onStop()
+//        if (runnig) {
+//            saveOffset()
+//            stopwatch.stop()
+//        }
+//    }
+
+    override fun onPause() {
+        super.onPause()
+        if (runnig) {
+            saveOffset()
+            stopwatch.stop()
+        }
+    }
+
+//    override fun onRestart() {
+//        super.onRestart()
+//        if (runnig) {
+//            setBaseTime()
+//            stopwatch.start()
+//            offset = 0
+//        }
+//    }
+override fun onResume() {
+        super.onResume()
+        if (runnig) {
+            setBaseTime()
+            stopwatch.start()
+            offset = 0
+        }
+    }
+
+    fun setBaseTime() {
         stopwatch.base = SystemClock.elapsedRealtime() - offset
     }
 
-    fun saveOffset(){
+    fun saveOffset() {
         offset = SystemClock.elapsedRealtime() - stopwatch.base
     }
 
